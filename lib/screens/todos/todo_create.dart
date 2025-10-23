@@ -28,6 +28,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
     final todoProvider = Provider.of<TodoProvider>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text(
           'Create New Todo',
@@ -60,7 +61,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         child: SafeArea(
           child: Form(
             key: _formKey,
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +249,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                       ),
                     ),
                   ],
-                  const Spacer(),
+                  const SizedBox(height: 30),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -272,6 +273,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

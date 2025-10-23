@@ -82,34 +82,57 @@ class _TodoListScreenState extends State<TodoListScreen>
         bottom: TabBar(
           controller: _tabController,
           onTap: (index) => setState(() => _selectedFilter = index),
+          isScrollable: false,
+          tabAlignment: TabAlignment.fill,
           tabs: [
             Tab(
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.list),
-                  const SizedBox(width: 4),
-                  Text('All (${todoProvider.todoList.length})'),
+                  const Icon(Icons.list, size: 18),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      'All (${todoProvider.todoList.length})',
+                      style: const TextStyle(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
             Tab(
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.pending_actions),
-                  const SizedBox(width: 4),
-                  Text('Pending (${todoProvider.incompleteTodos.length})'),
+                  const Icon(Icons.pending_actions, size: 18),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      'Pending (${todoProvider.incompleteTodos.length})',
+                      style: const TextStyle(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
             Tab(
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle),
-                  const SizedBox(width: 4),
-                  Text('Done (${todoProvider.completedTodos.length})'),
+                  const Icon(Icons.check_circle, size: 18),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      'Done (${todoProvider.completedTodos.length})',
+                      style: const TextStyle(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -469,8 +492,8 @@ class _TodoListScreenState extends State<TodoListScreen>
               const Text('Confirm Delete'),
             ],
           ),
-          content: Text(
-            'Are you sure you want to delete "${todo.title}"? This action cannot be undone.',
+          content: const Text(
+            'Are you sure you want to delete ? This action cannot be undone.',
           ),
           actions: [
             TextButton(

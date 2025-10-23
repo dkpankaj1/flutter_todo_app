@@ -61,6 +61,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text(
           'Edit Todo',
@@ -93,7 +94,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
         child: SafeArea(
           child: Form(
             key: _formKey,
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,6 +257,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
