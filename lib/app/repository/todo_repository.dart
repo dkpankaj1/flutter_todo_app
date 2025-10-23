@@ -67,6 +67,34 @@ class TodoRepository {
     }
   }
 
+  Future<TodoModel> update(int id, Map<String, dynamic> payload) async {
+    try {
+      final response =
+          await _apiClient.dio.put('todos/${id.toString()}', data: payload);
+
+      // Check if response has the expected structure
+      if (response.data == null) {
+        throw ApiException("Invalid response: no data received");
+      }
+
+      if (response.data is! Map<String, dynamic>) {
+        throw ApiException("Invalid response format");
+      }
+
+      final responseData = response.data as Map<String, dynamic>;
+      if (!responseData.containsKey('data')) {
+        throw ApiException("Invalid response: missing data field");
+      }
+
+      return TodoModel.fromJson(responseData['data']);
+    } on DioException catch (e) {
+      if (e.error is ApiException) throw e.error!;
+      throw ApiException("Failed to update todo");
+    } catch (e) {
+      throw ApiException("Failed to update todo: ${e.toString()}");
+    }
+  }
+
   Future<bool> delete(int id) async {
     try {
       final response = await _apiClient.dio.delete('todos/${id.toString()}');

@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:mytodo/app/model/todo_model.dart';
 import 'package:mytodo/app/provider/todo.provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mytodo/app/routes/app.route.dart';
 import 'package:provider/provider.dart';
 
-class TodoCreateScreen extends StatefulWidget {
-  const TodoCreateScreen({super.key});
+class TodoEditScreen extends StatefulWidget {
+  final int todoId;
+
+  const TodoEditScreen({super.key, required this.todoId});
 
   @override
-  State<TodoCreateScreen> createState() => _TodoCreateScreenState();
+  State<TodoEditScreen> createState() => _TodoEditScreenState();
 }
 
-class _TodoCreateScreenState extends State<TodoCreateScreen> {
+class _TodoEditScreenState extends State<TodoEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  bool _isCompleted = false;
+  TodoModel? _todo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodo();
+  }
+
+  void _loadTodo() {
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+    _todo = todoProvider.getTodoById(widget.todoId);
+
+    if (_todo != null) {
+      _titleController.text = _todo!.title;
+      _descriptionController.text = _todo!.description;
+      _isCompleted = _todo!.isCompleted;
+    }
+  }
 
   @override
   void dispose() {
@@ -27,10 +49,21 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
   Widget build(BuildContext context) {
     final todoProvider = Provider.of<TodoProvider>(context);
 
+    if (_todo == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Todo'),
+        ),
+        body: const Center(
+          child: Text('Todo not found'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Create New Todo',
+          'Edit Todo',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -76,60 +109,21 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.add_task,
+                          Text(
+                            'Edit your todo',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,
-                                  size: 28,
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Add New Todo',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                    ),
-                                    Text(
-                                      'What do you want to accomplish?',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: Colors.grey.shade600,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 24),
                           TextFormField(
                             controller: _titleController,
                             decoration: InputDecoration(
                               labelText: 'Title *',
-                              hintText: 'Enter todo title...',
                               errorText: todoProvider.titleError,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -145,8 +139,6 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                                 Icons.title,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                              filled: true,
-                              fillColor: Colors.grey.shade50,
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -159,8 +151,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                           TextFormField(
                             controller: _descriptionController,
                             decoration: InputDecoration(
-                              labelText: 'Description (optional)',
-                              hintText: 'Enter description...',
+                              labelText: 'Description',
                               errorText: todoProvider.descriptionError,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -176,11 +167,28 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                                 Icons.description,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                              filled: true,
-                              fillColor: Colors.grey.shade50,
                             ),
-                            maxLines: 4,
-                            textInputAction: TextInputAction.done,
+                            maxLines: 3,
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _isCompleted,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isCompleted = value ?? false;
+                                  });
+                                },
+                                activeColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Mark as completed',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -199,7 +207,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                         ),
                         elevation: 4,
                       ),
-                      onPressed: todoProvider.loading ? null : _createTodo,
+                      onPressed: todoProvider.loading ? null : _updateTodo,
                       child: todoProvider.loading
                           ? const SizedBox(
                               height: 20,
@@ -212,10 +220,10 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                           : const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_task),
+                                Icon(Icons.save),
                                 SizedBox(width: 8),
                                 Text(
-                                  'Create Todo',
+                                  'Update Todo',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -248,30 +256,6 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
                       ),
                     ),
                   ],
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.lightbulb, color: Colors.blue.shade600),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Tip: Keep your todos clear and actionable!',
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -281,29 +265,27 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
     );
   }
 
-  void _createTodo() async {
+  void _updateTodo() async {
     if (!_formKey.currentState!.validate()) return;
 
     final todoProvider = Provider.of<TodoProvider>(context, listen: false);
 
     try {
-      await todoProvider.createTodos(
+      await todoProvider.updateTodo(
+        widget.todoId,
         _titleController.text.trim(),
         _descriptionController.text.trim(),
+        _isCompleted,
       );
 
       if (context.mounted) {
-        // Clear the form on successful creation
-        _titleController.clear();
-        _descriptionController.clear();
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 8),
-                Text('Todo created successfully!'),
+                Text('Todo updated successfully!'),
               ],
             ),
             backgroundColor: Colors.green,
@@ -313,9 +295,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             ),
           ),
         );
-
-        // Navigate back to todo list
-        context.goNamed(RouteName.todo);
+        context.pop();
       }
     } catch (e) {
       if (context.mounted) {

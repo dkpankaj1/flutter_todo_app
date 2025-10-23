@@ -4,6 +4,7 @@ import 'package:mytodo/app/provider/auth.provider.dart';
 import 'package:mytodo/screens/auth/login.dart';
 import 'package:mytodo/screens/auth/register.dart';
 import 'package:mytodo/screens/todos/todo_create.dart';
+import 'package:mytodo/screens/todos/todo_edit.dart';
 import 'package:mytodo/screens/todos/todo_list.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +56,14 @@ GoRouter createRouter(BuildContext context) {
               path: 'create',
               builder: (_, __) => const TodoCreateScreen(),
             ),
+            GoRoute(
+              name: RouteName.editTodo,
+              path: 'edit/:id',
+              builder: (_, state) {
+                final id = int.parse(state.pathParameters['id']!);
+                return TodoEditScreen(todoId: id);
+              },
+            ),
           ]),
     ],
   );
@@ -65,4 +74,5 @@ class RouteName {
   static String register = "register";
   static String todo = "todo.index";
   static String createTodo = "todo.create";
+  static String editTodo = "todo.edit";
 }
